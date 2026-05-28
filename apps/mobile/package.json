@@ -4,7 +4,7 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "echo 'TODO: React Native setup'",
+    "dev": "echo 'React Native not yet activated. See src/index.ts for setup instructions.'",
     "build": "echo 'TODO: React Native build'",
     "check-types": "tsc --noEmit"
   },
