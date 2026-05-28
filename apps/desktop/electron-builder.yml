@@ -1,0 +1,15 @@
+appId: com.bunnystack.desktop
+productName: Bunnystack
+directories:
+  buildResources: build
+  output: dist
+files:
+  - dist-electron
+  - dist-web
+win:
+  target: [nsis]
+mac:
+  target: [dmg, zip]
+linux:
+  target: [AppImage, deb]
+publish: null

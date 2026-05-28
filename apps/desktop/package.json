@@ -4,14 +4,21 @@
   "version": "0.1.0",
   "type": "module",
   "scripts": {
-    "dev": "echo 'Electron not yet activated. See src/index.ts for setup instructions.'",
-    "build": "echo 'TODO: Electron build'",
+    "dev": "echo 'Desktop app: run `bun run build` first, then `bun run start`'",
+    "start": "electron .",
+    "build": "tsc --noEmit && echo 'Desktop build: run `bun run dist` to package'",
+    "pack": "tsc --noEmit && electron-builder --dir",
+    "dist": "tsc --noEmit && electron-builder",
+    "deploy": "electron-builder --publish always",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
     "@bunnystack/config": "workspace:*"
   },
   "devDependencies": {
+    "electron": "^35.0.0",
+    "electron-builder": "^26.0.0",
+    "vite": "^6.3.0",
     "typescript": "^5.9.0"
   }
 }

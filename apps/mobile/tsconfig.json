@@ -1,14 +1,9 @@
 {
+  "extends": "@bunnystack/config/tsconfig/base",
   "compilerOptions": {
-    "target": "ESNext",
-    "module": "ESNext",
-    "moduleResolution": "bundler",
-    "outDir": "./dist",
+    "jsx": "react-jsx",
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+    "moduleResolution": "bundler"
   },
-  "include": ["src"]
+  "include": ["src", "App.tsx"]
 }

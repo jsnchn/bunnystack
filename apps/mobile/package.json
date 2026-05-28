@@ -2,16 +2,31 @@
   "name": "mobile",
   "private": true,
   "version": "0.1.0",
-  "type": "module",
-  "scripts": {
-    "dev": "echo 'React Native not yet activated. See src/index.ts for setup instructions.'",
-    "build": "echo 'TODO: React Native build'",
+"scripts": {
+    "dev": "echo 'Mobile app: run `bun run start` to launch Expo'",
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "build": "tsc --noEmit && echo 'Mobile build: run `bun run deploy` for EAS build'",
+    "deploy": "eas build --platform all --auto-submit",
     "check-types": "tsc --noEmit"
   },
   "dependencies": {
+    "react": "^19.1.0",
+    "react-native": "^0.78.0",
+    "expo": "^53.0.0",
+    "expo-router": "^5.0.0",
+    "@bunnystack/auth": "workspace:*",
     "@bunnystack/config": "workspace:*"
   },
   "devDependencies": {
+    "@types/react": "^19.1.0",
     "typescript": "^5.9.0"
+  },
+  "expo": {
+    "name": "Bunnystack",
+    "slug": "bunnystack",
+    "version": "1.0.0",
+    "platforms": ["ios", "android"]
   }
 }

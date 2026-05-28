@@ -1,0 +1,14 @@
+{
+  "expo": {
+    "name": "Bunnystack",
+    "slug": "bunnystack",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "light",
+    "splash": { "backgroundColor": "#ffffff" },
+    "ios": { "supportsTablet": true, "bundleIdentifier": "com.bunnystack.app" },
+    "android": { "adaptiveIcon": { "backgroundColor": "#ffffff" }, "package": "com.bunnystack.app" },
+    "plugins": ["expo-router"]
+  }
+}
