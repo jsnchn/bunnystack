@@ -67,6 +67,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@bunnystack/config": "workspace:*",
+        "@bunnystack/db": "workspace:*",
         "better-auth": "^1.2.0",
       },
       "devDependencies": {

@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@bunnystack/config": "workspace:*",
+    "@bunnystack/db": "workspace:*",
     "better-auth": "^1.2.0"
   },
   "devDependencies": {

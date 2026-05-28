@@ -1,10 +1,18 @@
 import { betterAuth } from "better-auth";
+import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { db } from "@bunnystack/db";
+import * as schema from "@bunnystack/db/schema";
 
 export const auth = betterAuth({
-  database: {
-    provider: "postgres",
-    url: process.env.DATABASE_URL || "postgres://localhost:5432/bunnystack",
-  },
+  database: drizzleAdapter(db, {
+    provider: "pg",
+    schema: {
+      user: schema.user,
+      session: schema.session,
+      account: schema.account,
+      verification: schema.verification,
+    },
+  }),
   emailAndPassword: {
     enabled: true,
   },
