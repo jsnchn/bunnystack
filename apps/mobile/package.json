@@ -1,0 +1,17 @@
+{
+  "name": "mobile",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "echo 'TODO: React Native setup'",
+    "build": "echo 'TODO: React Native build'",
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@bunnystack/config": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.0"
+  }
+}

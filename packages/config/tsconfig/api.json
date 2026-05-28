@@ -1,0 +1,8 @@
+{
+  "extends": "@bunnystack/config/tsconfig/base.json",
+  "compilerOptions": {
+    "types": ["bun-types"],
+    "outDir": "./dist",
+    "rootDir": "./src"
+  }
+}

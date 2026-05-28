@@ -1,0 +1,19 @@
+{
+  "name": "@bunnystack/config",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "exports": {
+    "./tsconfig/*": "./tsconfig/*.json",
+    "./env": "./src/env.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.3.0",
+    "typescript": "^5.9.0"
+  }
+}
