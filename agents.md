@@ -11,10 +11,12 @@ improves accuracy.
 - **Runtime:** Bun (not Node.js)
 - **Monorepo:** Turborepo with workspaces
 - **Backend:** ElysiaJS (port 3000)
-- **Frontend:** React + Vite (port 5173)
+- **Frontend:** React + Vite + Tailwind v4 (port 5173)
+- **Mobile:** React Native + Expo (EAS Build)
+- **Desktop:** Electron + electron-builder
 - **Database:** PostgreSQL + Drizzle ORM
-- **Auth:** Better-Auth (email/password)
-- **Deploy:** Fly.io (containers)
+- **Auth:** Better-Auth (email/password + Google SSO)
+- **Deploy:** Fly.io (API+Web single app), EAS Build (Mobile), electron-builder (Desktop)
 - **PM:** `bun` (not npm/pnpm/yarn — don't use package-lock.json or pnpm-lock.yaml)
 - **TypeScript:** strict mode, bundler module resolution
 
@@ -26,9 +28,9 @@ improves accuracy.
 bunnystack/
 ├── apps/
 │   ├── api/          # ElysiaJS backend server
-│   ├── web/          # React + Vite SPA
-│   ├── mobile/       # React Native (placeholder)
-│   └── desktop/      # Electron (placeholder)
+│   ├── web/          # React + Vite SPA (Tailwind, react-router)
+│   ├── mobile/       # React Native + Expo (EAS Build)
+│   └── desktop/      # Electron + electron-builder
 ├── packages/
 │   ├── db/           # Drizzle ORM schema + client
 │   ├── auth/         # Better-Auth configuration
@@ -43,7 +45,7 @@ bunnystack/
 
 ```bash
 bun install              # Install all dependencies (workspace-aware)
-bun run dev              # Start all apps in dev mode (API on 3000, Web on 5173)
+bun run dev              # Start all apps in dev mode (API on :3000, Web on :5173)
 bun run build            # Build all packages to dist/
 bun run check-types      # Type-check all packages
 bun run lint             # Lint all packages
@@ -54,6 +56,17 @@ bun run --filter @bunnystack/db generate         # Generate migration
 bun run --filter @bunnystack/db migrate          # Apply migration
 bun run --filter @bunnystack/db push             # Push schema directly
 bun run --filter @bunnystack/db studio           # Open Drizzle Studio
+
+# Mobile (React Native + Expo)
+bun run --filter mobile start                    # Start Expo dev server
+bun run --filter mobile deploy                   # EAS Build + submit
+
+# Desktop (Electron)
+bun run --filter desktop start                   # Launch Electron window
+bun run --filter desktop dist                    # Package for current platform
+
+# Deploy (Fly.io)
+fly deploy                                       # Deploy API + Web single app
 ```
 
 ---
@@ -109,8 +122,8 @@ CodeGraph is installed as an MCP server in Hermes Agent — tools like
 ### Auth
 - Configured in `packages/auth/src/auth.ts`
 - Uses Better-Auth with Postgres adapter
-- Email/password enabled by default
-- Extend with OAuth plugins via Better-Auth's plugin system
+- Email/password + Google SSO enabled by default
+- Google sign-in at `/api/auth/sign-in/google`
 
 ### Frontend
 - Vite proxies `/api/*` to the backend in dev mode
@@ -127,8 +140,8 @@ When spinning up a new project from this template:
 2. `bun install`
 3. `codegraph init -i` (if not already indexed)
 4. `docker compose up -d db`
-5. `bun run --filter @bunnystack/db generate && bun run --filter @bunnystack/db migrate`
-6. Copy `.env.example` to `.env` and fill in values
+5. `cp .env.example .env` — fill in `BETTER_AUTH_SECRET`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
+6. `bun run db:migrate`
 7. `bun run dev`
 
 ---

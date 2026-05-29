@@ -34,8 +34,8 @@ The API server starts on **http://localhost:3000** and the web app on
 |---|---|---|
 | `apps/api` | Backend API server — routes, auth middleware, health check | Bun, ElysiaJS |
 | `apps/web` | Frontend SPA — login, signup, dashboard pages | React 19, Vite 6, Tailwind v4, react-router v7 |
-| `apps/mobile` | React Native app _(placeholder — activate manually)_ | React Native |
-| `apps/desktop` | Electron app _(placeholder — activate manually)_ | Electron |
+|| `apps/mobile` | React Native mobile app — Expo with EAS Build for app store deployment | React Native, Expo |
+|| `apps/desktop` | Electron desktop app — packaging for Win/Mac/Linux via electron-builder | Electron, electron-builder |
 | `packages/db` | Database schema, migrations, and client | Drizzle ORM, postgres |
 | `packages/auth` | Authentication configuration with Better-Auth | Better-Auth, Drizzle adapter |
 | `packages/config` | Shared TypeScript configs and environment validation | tsconfig files, env helper |
@@ -57,8 +57,17 @@ bunnystack/
 │   │   │   ├── lib/          # API client helpers
 │   │   │   └── App.tsx       # Router setup
 │   │   └── package.json
-│   ├── mobile/               # React Native (placeholder)
-│   └── desktop/              # Electron (placeholder)
+│   ├── mobile/               # React Native + Expo
+│   │   ├── App.tsx            # Expo entry component
+│   │   ├── app.json           # Expo config (iOS/Android identifiers)
+│   │   ├── eas.json           # EAS Build profiles
+│   │   └── package.json
+│   ├── desktop/              # Electron + electron-builder
+│   │   ├── src/
+│   │   │   ├── main.ts       # Electron main process
+│   │   │   └── preload.ts    # Context bridge
+│   │   ├── electron-builder.yml  # Packaging config
+│   │   └── package.json
 ├── packages/
 │   ├── db/                   # Drizzle ORM
 │   │   ├── src/
@@ -68,7 +77,7 @@ bunnystack/
 │   │   └── package.json
 │   ├── auth/                 # Better-Auth
 │   │   ├── src/
-│   │   │   └── auth.ts       # Auth config (email/password)
+│   │   │   └── auth.ts       # Auth config (email/password + Google SSO)
 │   │   └── package.json
 │   └── config/               # Shared configs
 │       ├── tsconfig/         # base.json, api.json, web.json
@@ -131,6 +140,11 @@ All commands are run from the project root.
 | `web` | `bun run --filter web dev` | Start Vite dev server |
 | `web` | `bun run --filter web build` | Build web for production |
 | `web` | `bun run --filter web preview` | Preview production build |
+| `mobile` | `bun run --filter mobile start` | Start Expo dev server |
+| `mobile` | `bun run --filter mobile deploy` | EAS Build + submit to stores |
+| `desktop` | `bun run --filter desktop start` | Launch Electron app |
+| `desktop` | `bun run --filter desktop dist` | Package for current platform |
+| `desktop` | `bun run --filter desktop deploy` | Package + publish |
 
 ---
 
@@ -143,7 +157,9 @@ Copy `.env.example` to `.env` and fill in the values:
 | `DATABASE_URL` | `postgres://bunnystack:***@localhost:5432/bunnystack` | PostgreSQL connection string |
 | `PORT` | `3000` | Port for the API server |
 | `BETTER_AUTH_SECRET` | _(none — required)_ | Secret key for Better-Auth session signing |
-| `BETTER_AUTH_URL` | `http://localhost:3000` | Public URL for Better-Auth callbacks |
+|| `BETTER_AUTH_URL` | `http://localhost:3000` | Public URL for Better-Auth callbacks |
+| `GOOGLE_CLIENT_ID` | _(none — placeholder)_ | Google OAuth client ID (from Google Cloud Console) |
+| `GOOGLE_CLIENT_SECRET` | _(none — placeholder)_ | Google OAuth client secret (from Google Cloud Console) |
 | `NODE_ENV` | `development` | Environment mode (`development`, `production`, `test`) |
 
 ### Production secrets (Fly.io)
@@ -228,9 +244,13 @@ Turborepo caches results — only changed packages re-check.
 
 ## Deployment
 
-Deploying to Fly.io is the primary deployment path.
+### API + Web (Fly.io — primary)
 
-### One-time setup
+The included `Dockerfile` builds both the API binary and web static assets into a
+single production image. The Elysia server serves the web frontend at `/` via
+`@elysiajs/static`, so a single Fly.io app handles both layers.
+
+**One-time setup:**
 
 ```bash
 # Install flyctl
@@ -244,26 +264,58 @@ fly launch --image oven/bun:1
 
 # Set production secrets
 fly secrets set DATABASE_URL="<your-production-postgres-url>"
-fly secrets set BETTER_AUTH_SECRET="<your-secret>"
+fly secrets set BETTER_AUTH_SECRET="***"
 fly secrets set BETTER_AUTH_URL="https://your-app.fly.dev"
+fly secrets set GOOGLE_CLIENT_ID="***"
+fly secrets set GOOGLE_CLIENT_SECRET="***"
 ```
 
-### Deploy
+**Deploy:**
 
 ```bash
 fly deploy
 ```
 
-The included `Dockerfile` builds the monorepo with a multi-stage Bun build,
-and the `fly.toml` configures the service on port 3000 with auto-scaling.
-
-### GitHub Actions (automatic)
-
-The included CI/CD workflows handle:
+**GitHub Actions (automatic) —** The included CI/CD workflows handle:
 
 - **CI** (`.github/workflows/ci.yml`) — Runs `check-types` and `build` on every PR.
 - **Deploy** (`.github/workflows/deploy.yml`) — Runs `fly deploy` on push to `main`.
   For this to work, set `FLY_API_TOKEN` as a GitHub Actions secret.
+
+---
+
+### Mobile (Expo + EAS Build)
+
+Deploy to iOS App Store and Google Play via Expo's EAS Build service.
+
+```bash
+# One-time
+cd apps/mobile
+bun run deploy    # Builds and submits to both stores
+```
+
+Configure `apps/mobile/eas.json` with your Apple ID and Google Play credentials.
+See the [EAS Build docs](https://docs.expo.dev/build/introduction/) for details.
+
+---
+
+### Desktop (electron-builder)
+
+Package for Windows (NSIS), macOS (DMG), and Linux (AppImage/deb).
+
+```bash
+cd apps/desktop
+
+# Package for current platform
+bun run dist
+
+# Package for all platforms
+bun run dist -- --win --mac --linux
+```
+
+Output goes to `apps/desktop/dist/`. Configure signing and notarization in
+`apps/desktop/electron-builder.yml`. See the
+[electron-builder docs](https://www.electron.build/) for details.
 
 ---
 
@@ -369,8 +421,8 @@ Follow this checklist to spin up a new project from the template:
   `GET /api/health`.
 - **Database**: Schema lives in `packages/db/src/schema.ts`. Always generate
   migrations for production; use `push` only in development.
-- **Auth**: Configured in `packages/auth/src/auth.ts`. Email/password is enabled
-  by default. Extend with OAuth plugins via Better-Auth's plugin system.
+- **Auth**: Configured in `packages/auth/src/auth.ts`. Email/password + Google SSO
+  enabled by default. Google sign-in redirects to `/api/auth/sign-in/google`.
 - **Frontend**: Vite proxies `/api/*` to the backend in dev mode. Pages go in
   `apps/web/src/pages/`. API client helpers go in `apps/web/src/lib/`.
 - **TypeScript**: Strict mode always. Prefer `unknown` + type guards over `any`.
