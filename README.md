@@ -125,6 +125,11 @@ All commands are run from the project root.
 | `bun run db:generate` | Generate a new Drizzle migration |
 | `bun run db:migrate` | Apply pending migrations |
 | `bun run db:studio` | Launch Drizzle Studio GUI |
+| `bun run dev:with-tunnel` | Start dev servers with Cloudflare Tunnel (optional) |
+| `bun run tunnel:setup` | One-time: authenticate Cloudflare, create tunnel, route DNS |
+| `bun run tunnel:up` | Start the tunnel container |
+| `bun run tunnel:down` | Stop the tunnel container |
+| `bun run tunnel:logs` | View tunnel logs |
 
 ### Per-package scripts (bun run --filter <pkg> <script>)
 
@@ -161,6 +166,13 @@ Copy `.env.example` to `.env` and fill in the values:
 | `GOOGLE_CLIENT_ID` | _(none — placeholder)_ | Google OAuth client ID (from Google Cloud Console) |
 | `GOOGLE_CLIENT_SECRET` | _(none — placeholder)_ | Google OAuth client secret (from Google Cloud Console) |
 | `NODE_ENV` | `development` | Environment mode (`development`, `production`, `test`) |
+
+### Tunnel vars
+
+| Variable | Default | Description |
+|---|---|---|
+| `TUNNEL_SUBDOMAIN` | _(none — required)_ | Subdomain prefix: `<name>.jsnchn.net` |
+| `TUNNEL_NAME` | `bunnystack-tunnel` | cloudflared tunnel name (for DNS routing) |
 
 ### Production secrets (Fly.io)
 
@@ -316,6 +328,60 @@ bun run dist -- --win --mac --linux
 Output goes to `apps/desktop/dist/`. Configure signing and notarization in
 `apps/desktop/electron-builder.yml`. See the
 [electron-builder docs](https://www.electron.build/) for details.
+
+---
+
+## Cloudflare Tunnel (Optional)
+
+The project includes an optional Cloudflare Tunnel for receiving webhooks and
+sharing your local dev environment over a public URL during development.
+
+### One-time setup
+
+```bash
+# 1. Install cloudflared (if not already installed)
+brew install cloudflared         # macOS
+sudo apt install cloudflared      # Debian/Ubuntu
+
+# 2. Set your subdomain in .env
+echo "TUNNEL_SUBDOMAIN=myproject" >> .env
+
+# 3. Run the setup script
+bun run tunnel:setup
+```
+
+This authenticates with Cloudflare, creates a tunnel, and routes DNS so
+`https://myproject.jsnchn.net` points to your local dev environment.
+
+### Daily usage
+
+```bash
+# Start with tunnel
+bun run dev:with-tunnel
+
+# Or separately:
+bun run dev               # in one terminal
+bun run tunnel:up         # in another
+
+# Visit
+open https://myproject.jsnchn.net
+
+# Stop tunnel
+bun run tunnel:down
+```
+
+### How it works
+
+The tunnel runs as a Docker container (`cloudflare/cloudflared:latest`) defined in
+`docker-compose.tunnel.yml`. It uses host networking to reach your local dev servers
+directly:
+
+- Requests to `/api/*` are proxied to Elysia on **localhost:3000**
+- All other requests go to Vite on **localhost:5173**
+
+The tunnel shares the same hostname for both web and API, so requests are
+same-origin — no CORS issues. For Better-Auth to generate correct redirects,
+set `BETTER_AUTH_URL` to your tunnel URL in `.env`.
 
 ---
 

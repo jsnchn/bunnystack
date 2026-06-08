@@ -1,0 +1,14 @@
+# Docker Compose override — adds Cloudflare Tunnel service for development.
+# Usage: docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d
+# Or use the `bun run dev:with-tunnel` script.
+services:
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    container_name: bunnystack-tunnel
+    restart: unless-stopped
+    # Use host network so cloudflared can reach localhost:3000 and localhost:5173
+    # running on the host (Bun/Vite dev servers, not in Docker containers).
+    network_mode: "host"
+    volumes:
+      - .cloudflared:/home/nonroot/.cloudflared:ro
+    command: tunnel run

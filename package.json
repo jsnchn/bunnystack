@@ -12,7 +12,12 @@
     "db:down": "docker compose down",
     "db:generate": "bun run --filter @bunnystack/db generate",
     "db:migrate": "bun run --filter @bunnystack/db migrate",
-    "db:studio": "bun run --filter @bunnystack/db studio"
+    "db:studio": "bun run --filter @bunnystack/db studio",
+    "dev:with-tunnel": "bun run tunnel:up && bun run dev",
+    "tunnel:up": "docker compose -f docker-compose.yml -f docker-compose.tunnel.yml up -d cloudflared",
+    "tunnel:down": "docker compose -f docker-compose.yml -f docker-compose.tunnel.yml down",
+    "tunnel:logs": "docker compose -f docker-compose.yml -f docker-compose.tunnel.yml logs -f cloudflared",
+    "tunnel:setup": "bash scripts/setup-tunnel.sh"
   },
   "devDependencies": {
     "prettier": "^3.7.4",

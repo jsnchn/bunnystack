@@ -1,0 +1,23 @@
+# cloudflared ingress configuration
+# Routes <subdomain>.jsnchn.net traffic to local dev services.
+# The tunnel name and credentials-file are substituted by the setup script.
+tunnel: ${TUNNEL_NAME}
+credentials-file: /home/nonroot/.cloudflared/${TUNNEL_CREDENTIALS_FILE}
+
+ingress:
+  # API routes — proxy directly to Elysia on port 3000
+  - hostname: "${TUNNEL_SUBDOMAIN}.jsnchn.net"
+    path: "/api/*"
+    service: http://host.docker.internal:3000
+  - hostname: "${TUNNEL_SUBDOMAIN}.jsnchn.net"
+    path: "/api*"
+    service: http://host.docker.internal:3000
+  # Health endpoint
+  - hostname: "${TUNNEL_SUBDOMAIN}.jsnchn.net"
+    path: "/health"
+    service: http://host.docker.internal:3000
+  # Everything else → Vite dev server on 5173
+  - hostname: "${TUNNEL_SUBDOMAIN}.jsnchn.net"
+    service: http://host.docker.internal:5173
+  # Catch-all: return 404 for unknown hostnames
+  - service: http_status:404

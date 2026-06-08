@@ -67,7 +67,54 @@ bun run --filter desktop dist                    # Package for current platform
 
 # Deploy (Fly.io)
 fly deploy                                       # Deploy API + Web single app
+
+# Cloudflare Tunnel (optional)
+bun run tunnel:setup                             # One-time: auth + create tunnel + DNS
+bun run dev:with-tunnel                          # Start dev servers + tunnel
+bun run tunnel:up                                # Start tunnel container
+bun run tunnel:down                              # Stop tunnel container
+bun run tunnel:logs                              # View tunnel logs
 ```
+
+---
+
+## Cloudflare Tunnel
+
+The project includes an optional Cloudflare Tunnel for receiving webhooks and
+exposing the local dev environment over a public subdomain of `jsnchn.net`.
+
+**One-time setup per project:**
+
+```bash
+# Set your subdomain in .env
+echo "TUNNEL_SUBDOMAIN=myproject" >> .env
+
+# Run the setup script
+bun run tunnel:setup
+```
+
+This authenticates with Cloudflare, creates a named tunnel, and routes DNS so
+`https://myproject.jsnchn.net` points to your local dev servers.
+
+**Start with tunnel:**
+
+```bash
+bun run dev:with-tunnel
+```
+
+**Architecture:**
+
+```
+cloudflared (Docker) ──┬── /api/* ──→ localhost:3000 (Elysia API)
+                       └── /* ──────→ localhost:5173 (Vite dev server)
+```
+
+**Environment variables** (in `.env`):
+
+| Variable | Example | Description |
+|---|---|---|
+| `TUNNEL_SUBDOMAIN` | `myproject` | Subdomain: `<name>.jsnchn.net` |
+| `TUNNEL_NAME` | `bunnystack-tunnel` | cloudflared tunnel name |
 
 ---
 

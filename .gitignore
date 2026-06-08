@@ -7,3 +7,7 @@ dist/
 *.tsbuildinfo
 .DS_Store
 *.log
+
+# Cloudflare Tunnel — credentials and certificates (not config.yml)
+.cloudflared/*.json
+.cloudflared/cert.pem
